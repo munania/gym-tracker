@@ -24,6 +24,29 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+//   Workout days provider
+  List _selectedWorkoutDays = [];
+
+  get getWorkoutDays => _selectedWorkoutDays;
+
+  // set setWorkoutDays(List days){
+  //   _selectedWorkoutDays = days;
+  // }
+
+  void setWorkoutDays(List days) { _selectedWorkoutDays = days;}
+
+  late String _currentDay;
+
+  void setCurrentDay(String day) {
+    _currentDay = day;
+  }
+
+  String getCurrentDay() {
+    return _currentDay;
+  }
+  // AppProvider({required this.currentDay});
+
+
 }
 
 class DayModel {

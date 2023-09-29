@@ -1,7 +1,6 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:gymtracker/db/databaseHelper.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -35,25 +34,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return null;
   }
 
-
-  Future<void> getQuoteFromDb(BuildContext context) async {
+  Future<void> getQuoteFromDb(SharedPreferences prefs,
+      AppProvider quotesProvider, BuildContext context) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     final lastFetchTime = await getLastQuoteFetchTimestamp(prefs);
 
-    if (lastFetchTime == null || DateTime
-        .now()
-        .difference(lastFetchTime)
-        .inHours >= 24) {
+    if (lastFetchTime == null ||
+        DateTime.now().difference(lastFetchTime).inHours >= 24) {
       final DatabaseHelper databaseHelper = DatabaseHelper.instance;
       final randomQuote = await databaseHelper.getRandomQuote();
 
-      final quotesProvider = Provider.of<AppProvider>(context, listen: false);
+      // final quotesProvider = Provider.of<AppProvider>(context, listen: false);
       quotesProvider.quote = randomQuote?['text'];
       quotesProvider.author = randomQuote?['author'];
-      await prefs.setInt('lastQuoteFetchTime', DateTime
-          .now()
-          .millisecondsSinceEpoch);
+      await prefs.setInt(
+          'lastQuoteFetchTime', DateTime.now().millisecondsSinceEpoch);
     }
   }
 
@@ -61,14 +57,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     getUsername();
-    getQuoteFromDb(context);
+    SharedPreferences.getInstance().then((prefs) {
+      final quotesProvider = Provider.of<AppProvider>(context, listen: false);
+      getQuoteFromDb(prefs, quotesProvider, context);
+    });
+  }
+
+  void getCurrentDayWorkoutSession(int dayId) async {
+    final DatabaseHelper databaseHelper = DatabaseHelper.instance;
+    String? focusArea = await databaseHelper.getFocusAreaForDay(dayId);
+    print('Focus Area: $focusArea');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('Gym Tracker'),
+        centerTitle: true,
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
@@ -83,15 +89,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     text: TextSpan(
                       text: 'Hello \n',
                       style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w300,
                       ),
                       children: <TextSpan>[
                         TextSpan(
                           text: userName,
                           style: const TextStyle(
                             color: Colors.greenAccent,
-                            fontSize: 18,
+                            fontSize: 30,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -101,7 +107,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              Lottie.asset('assets/lottie/gymworkout.json',
+              Lottie.asset(
+                'assets/lottie/gymworkout.json',
                 repeat: true,
                 reverse: true,
                 height: 250,
@@ -114,7 +121,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButtonWidget(),
+      floatingActionButton: const FloatingActionButtonWidget(),
     );
   }
 }
@@ -124,13 +131,23 @@ class TodaysWorkout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future<String?> getCurrentDayWorkoutSession(int dayId) async {
+      final DatabaseHelper databaseHelper = DatabaseHelper.instance;
+      String? focusArea = await databaseHelper.getFocusAreaForDay(dayId);
+      print('Focus Area: $focusArea');
+      return focusArea;
+    }
+
+    Future<String?> day() async {
+      DateTime now = DateTime.now();
+      int currentDay = now.weekday;
+      String? x = await getCurrentDayWorkoutSession(currentDay);
+      return x;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Today\'s Workout',
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-        ),
         const SizedBox(height: 10),
         Container(
           height: 200,
@@ -141,44 +158,71 @@ class TodaysWorkout extends StatelessWidget {
           ),
           child: Column(
             children: [
-              const Row(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              FutureBuilder<String?>(
+                future: day(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    final focusArea = snapshot.data;
+                    return Column(
                       children: [
-                        Text(
-                          'Workout Name',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(top: 20.0, left: 16.0),
+                              child: Text(
+                                'Today\'s Workout is',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 20),
-                        Text(
-                          'Workout Description',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          'More info about the workout',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "$focusArea",
+                                    style: const TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                  ),
-                ],
+                    );
+                  }
+                },
               ),
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.only(left: 20, right: 20),
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    final quotesProvider =
+                        Provider.of<AppProvider>(context, listen: false);
+                    String d = quotesProvider.getCurrentDay();
+                    print("Today is: $d");
+
+                    Get.toNamed('/workoutData');
+                  },
                   child: const Text(
                     'Start Workout',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -222,7 +266,9 @@ class Motivation extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 10,),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     Text(
                       "by ${appProvider.author}",
                       style: const TextStyle(

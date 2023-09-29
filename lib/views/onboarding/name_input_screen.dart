@@ -18,7 +18,6 @@ class _NameInputScreenState extends State<NameInputScreen> {
 
   bool showError = false;
 
-
   void _onContinueButtonPressed() {
     if (nameInputController.text.isEmpty) {
       setState(() {

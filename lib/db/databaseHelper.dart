@@ -39,8 +39,7 @@ class DatabaseHelper {
       await db.execute('''
         CREATE TABLE users (
             id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            workout_days TEXT,
+            username TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );      
       ''');
@@ -52,6 +51,7 @@ class DatabaseHelper {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
        ''');
+
       await db.execute('''
              CREATE TABLE workouts (
             id INTEGER PRIMARY KEY,
@@ -59,36 +59,21 @@ class DatabaseHelper {
             sets INTEGER NOT NULL,
             reps INTEGER NOT NULL,
             weight INTEGER NOT NULL,
-            duration INTEGER NOT NULL
+            duration INTEGER NOT NULL,
+            day_id INTEGER,
+            FOREIGN KEY (day_id) REFERENCES workout_days (day_id)
         );
       ''');
-      await db.execute('''
-              CREATE TABLE exercise_categories (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-      ''');
-      await db.execute('''
-            CREATE TABLE routines (
-            id INTEGER PRIMARY KEY,
-            user_id INTEGER,
-            name TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        );
-     ''');
-      await db.execute('''CREATE TABLE routine_exercises (
-            id INTEGER PRIMARY KEY,
-            routine_id INTEGER,
-            exercise_id INTEGER,
-            sets INTEGER,
-            reps INTEGER,
-            weight INTEGER,
-            FOREIGN KEY (routine_id) REFERENCES routines (id),
-            FOREIGN KEY (exercise_id) REFERENCES exercises (id)
-      )''');
 
+      await db.execute('''
+          CREATE TABLE workout_days (
+            day_id INTEGER PRIMARY KEY,
+            user_id INTEGER,
+            day_name TEXT,
+            focus_area TEXT,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+          );
+      ''');
     } catch (err) {
       print("OHH SHIT!");
       print(err.toString());
@@ -96,12 +81,15 @@ class DatabaseHelper {
     }
   }
 
+  // Insert workouts to the workouts table
   Future<void> insertWorkout({
     required String workoutName,
     required int sets,
     required int reps,
     required int weight,
     required int duration,
+    required int dayId,
+
   }) async {
     final db = await instance.database;
     await db.insert('workouts', {
@@ -110,19 +98,42 @@ class DatabaseHelper {
       'reps': reps,
       'weight': weight,
       'duration': duration,
+      'day_id': dayId,
+
     });
   }
 
-  Future<void> insertUser(
-      {required String userName, required List<String> workoutDays}) async {
+  // Insert user to the users table
+  Future<void> insertUser({required String userName}) async {
     final db = await instance.database;
-    await db.insert('users', {
-      'name': userName,
-      'workout_days':
-          workoutDays.join(', '), // Convert list to comma-separated string
+
+    // Check if a user with the same username already exists
+    final existingUser =
+        await db.query('users', where: 'username = ?', whereArgs: [userName]);
+
+    if (existingUser.isEmpty) {
+      await db.insert('users', {
+        'username': userName,
+      });
+    } else {
+      // User already exists, handle the error or provide feedback to the user
+      print('User with username $userName already exists.');
+    }
+  }
+
+  // Insert workoutDaya
+  Future<void> insertWorkoutDays({required dayName, required focusArea}) async {
+    final db = await instance.database;
+    final userId = await getUserId();
+
+    await db.insert('workout_days', {
+      'day_name': dayName,
+      'focus_area': focusArea,
+      'user_id': userId,
     });
   }
 
+  // Insert quotes from api to the quotes table
   Future<void> insertQuotes(
       {required String text, required String author}) async {
     final db = await instance.database;
@@ -130,6 +141,17 @@ class DatabaseHelper {
       'text': text,
       'author': author, // Convert list to comma-separated string
     });
+  }
+
+  // Get user id
+  Future<int> getUserId() async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> user = await db.query(
+      'users',
+      columns: ['id'],
+      limit: 1,
+    );
+    return user[0]['id'];
   }
 
   // Get quotes from db
@@ -190,28 +212,50 @@ class DatabaseHelper {
   }
 
   // Fetch users workout days from db
-  Future<List<Map<String, dynamic>>?> getWorkoutDays() async {
-    // Open the database
+  Future<List<String>> getWorkoutDayNames() async {
     final db = await instance.database;
+    final List<Map<String, dynamic>> results = await db.query('workout_days', columns: ['day_name']);
 
-    // Query the database to get the users workouts
-    final List<Map<String, dynamic>> results = await db.query(
-      'users',
-      columns: ['workout_days'], // Select only the 'workout_days' column
-      limit: 1, // Limit the result to the first user
-    );
+    List<String> dayNames = [];
 
-    // Close the database
-    await db.close();
-
-    // Check if a user was found
-    if (results.isNotEmpty) {
-      // Extract the name of the first user
-
-      return results;
+    for (var result in results) {
+      String dayName = result['day_name'];
+      dayNames.add(dayName);
     }
 
-    // No user found
-    return null;
+    return dayNames;
   }
+
+  Future<int> getWorkoutDayId(String selectedItem) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'workout_days',
+      where: 'day_name = ?',
+      whereArgs: [selectedItem],
+    );
+    if (result.isNotEmpty) {
+      return result.first['day_id'] as int;
+    } else {
+      return -1; // Return a default value or handle the case when workout day is not found
+    }
+  }
+
+  Future<String?> getFocusAreaForDay(int dayId) async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> results = await db.query(
+      'workout_days',
+      where: 'day_id = ?',
+      whereArgs: [dayId],
+    );
+    if (results.isNotEmpty) {
+      return results.first['focus_area'];
+    } else {
+      return null;
+    }
+  }
+
+
+
+//Get workout focus day depending on the current day
+
 }
