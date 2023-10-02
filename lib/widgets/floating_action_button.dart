@@ -87,6 +87,7 @@ class _FloatingActionButtonWidgetState extends State<FloatingActionButtonWidget>
                           height: spacing,
                         ),
                         CustomTextField(
+                          keyBoard: TextInputType.text,
                           labelText: 'Workout Name',
                           hintText: "Burpees...",
                           controller: exerciseNameController,
@@ -95,6 +96,7 @@ class _FloatingActionButtonWidgetState extends State<FloatingActionButtonWidget>
                           height: spacing,
                         ),
                         CustomTextField(
+                          keyBoard: TextInputType.number,
                           labelText: 'Sets',
                           hintText: "10",
                           controller: setsController,
@@ -103,6 +105,7 @@ class _FloatingActionButtonWidgetState extends State<FloatingActionButtonWidget>
                           height: spacing,
                         ),
                         CustomTextField(
+                          keyBoard: TextInputType.number,
                           labelText: 'Reps',
                           hintText: "10",
                           controller: repsController,
@@ -111,6 +114,7 @@ class _FloatingActionButtonWidgetState extends State<FloatingActionButtonWidget>
                           height: spacing,
                         ),
                         CustomTextField(
+                          keyBoard: TextInputType.number,
                           labelText: 'Weight',
                           hintText: "45 kgs",
                           controller: weightController,
@@ -119,6 +123,7 @@ class _FloatingActionButtonWidgetState extends State<FloatingActionButtonWidget>
                           height: spacing,
                         ),
                         CustomTextField(
+                          keyBoard: TextInputType.number,
                           labelText: 'Duration',
                           hintText: "10 minutes",
                           controller: restingTimeController,

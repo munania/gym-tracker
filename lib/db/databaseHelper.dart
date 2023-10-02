@@ -254,6 +254,56 @@ class DatabaseHelper {
     }
   }
 
+  Future<String?> getFocusAreaForDayString(String dayName) async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> results = await db.query(
+      'workout_days',
+      where: 'day_name = ?',
+      whereArgs: [dayName],
+    );
+    if (results.isNotEmpty) {
+      return results.first['focus_area'];
+    } else {
+      return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getWorkoutDaysForDay(int dayId) async {
+    final db = await instance.database;
+    return await db.query('workouts', where: 'day_id = ?', whereArgs: [dayId]);
+  }
+
+
+  Future<void> saveSelectedDaysWithFocusArea(Map<String, String> selectedDaysWithFocusArea) async {
+    final db = await database;
+    for (var entry in selectedDaysWithFocusArea.entries) {
+      await db.insert(
+        'workout_days',
+        {
+          'day_name': entry.key,
+          'focus_area': entry.value,
+          'user_id': await getUserId(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+  }
+
+  Future<void> deleteWorkout(id) async {
+    final db = await database;
+    await db.delete('workouts', where: 'id = ?' , whereArgs: [id]);
+  }
+
+  Future<void> updateFocusAreaForDay(String dayName, String newFocusArea) async {
+    final db = await instance.database;
+    await db.update(
+      'workout_days',
+      {'focus_area': newFocusArea},
+      where: 'day_name = ?',
+      whereArgs: [dayName],
+    );
+  }
+
 
 
 //Get workout focus day depending on the current day

@@ -6,6 +6,7 @@ class CustomTextField extends StatelessWidget {
 
   const CustomTextField(
       {Key? key,
+        this.keyBoard,
         this.onChanged,
         this.labelText,
         this.prefixIcon,
@@ -21,6 +22,7 @@ class CustomTextField extends StatelessWidget {
       : super(key: key);
 
   final String? labelText;
+  final TextInputType? keyBoard;
   final String? hintText;
   final Function(String val)? onChanged;
   final IconData? prefixIcon;
@@ -39,6 +41,7 @@ class CustomTextField extends StatelessWidget {
           onChanged!(val);
         }
       },
+      keyboardType: keyBoard,
       validator: validator,
       controller: controller,
       enabled: enabled,
