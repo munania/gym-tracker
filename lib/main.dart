@@ -8,6 +8,7 @@ import 'package:gymtracker/views/dashboard/homePage.dart';
 import 'package:gymtracker/views/learn/learn.dart';
 import 'package:gymtracker/views/onboarding/workout_focus.dart';
 import 'package:gymtracker/views/splash_screen.dart';
+import 'package:gymtracker/views/workouts/editWorkouts.dart';
 import 'package:gymtracker/views/workouts/workout_data.dart';
 import 'package:provider/provider.dart';
 
@@ -84,6 +85,7 @@ class MyApp extends StatelessWidget {
           GetPage(name: '/settingsScreen', page: () => const SettingsScreen()),
           GetPage(name: '/workoutFocus', page: () => const WorkoutFocus()),
           GetPage(name: '/workoutData', page: () => const WorkoutData()),
+          GetPage(name: '/editWorkouts', page: () => const EditWorkouts()),
           GetPage(
               name: '/floatingActionButton',
               page: () =>

@@ -23,31 +23,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     switch (day) {
       case 'Sunday':
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) => workoutDayPage(currentDay: "Sunday")));
+            MaterialPageRoute(builder: (context) => const workoutDayPage(currentDay: "Sunday")));
         break;
       case 'Monday':
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => workoutDayPage(currentDay: "Monday")));
+            context, MaterialPageRoute(builder: (context) => const workoutDayPage(currentDay: "Monday")));
         break;
       case 'Tuesday':
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) => workoutDayPage(currentDay: "Tuesday")));
+            MaterialPageRoute(builder: (context) => const workoutDayPage(currentDay: "Tuesday")));
         break;
       case 'Wednesday':
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) =>  workoutDayPage(currentDay: "Wednesday")));
+            MaterialPageRoute(builder: (context) =>  const workoutDayPage(currentDay: "Wednesday")));
         break;
       case 'Thursday':
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) =>  workoutDayPage(currentDay: "Thursday")));
+            MaterialPageRoute(builder: (context) =>  const workoutDayPage(currentDay: "Thursday")));
         break;
       case 'Friday':
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) =>  workoutDayPage(currentDay: "Friday")));
+            MaterialPageRoute(builder: (context) =>  const workoutDayPage(currentDay: "Friday")));
         break;
       case 'Saturday':
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) =>  workoutDayPage(currentDay: "Saturday")));
+            MaterialPageRoute(builder: (context) =>  const workoutDayPage(currentDay: "Saturday")));
         break;
     }
   }

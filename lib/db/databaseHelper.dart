@@ -240,6 +240,20 @@ class DatabaseHelper {
     }
   }
 
+  Future<String> getWorkoutDayName(int dayId) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'workout_days',
+      where: 'day_id = ?',
+      whereArgs: [dayId],
+    );
+    if (result.isNotEmpty) {
+      return result.first['day_name'] as String;
+    } else {
+      return ""; // Return a default value or handle the case when workout day is not found
+    }
+  }
+
   Future<String?> getFocusAreaForDay(int dayId) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> results = await db.query(
@@ -304,8 +318,15 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> deleteWorkoutDay(String day) async{
+    final db = await instance.database;
+    await db.delete('workout_days', where: 'day_name = ?', whereArgs: [day]);
+  }
 
-
-//Get workout focus day depending on the current day
+  Future<List<Map<String, dynamic>>>getAllWorkouts() async{
+    final db = await instance.database;
+    var workouts = await db.query('workouts');
+    return workouts;
+  }
 
 }

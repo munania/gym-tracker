@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../db/databaseHelper.dart';
+import '../../widgets/custom_textfield.dart';
 
 class workoutDayPage extends StatefulWidget {
   final String currentDay;
@@ -15,6 +16,9 @@ class workoutDayPage extends StatefulWidget {
 class workoutDayPageState extends State<workoutDayPage> {
   late String day = widget.currentDay;
   late TextEditingController controller;
+
+  TextEditingController focusAreaController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -66,6 +70,48 @@ class workoutDayPageState extends State<workoutDayPage> {
             }
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+            onPressed: () {
+              // Add your delete logic here
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Confirm Deletion"),
+                    content: const Text(
+                        "Are you sure you want to delete this workout day?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // Add code to delete the workout here
+                          DatabaseHelper databaseHelper =
+                              DatabaseHelper.instance;
+
+                          databaseHelper.deleteWorkoutDay(day);
+
+                          setState(() {});
+                          Navigator.of(context).pop(); // Close the dialog
+                        },
+                        child: const Text("Delete"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -110,13 +156,85 @@ class workoutDayPageState extends State<workoutDayPage> {
                   );
                 } else {
                   return Expanded(
-                    child: Center(
-                      child: Text(
-                        'Oops! no workouts found for $day',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w200,
-                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 90.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Oops! no workouts found for $day',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w200,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Add focus area for $day'),
+                                    content: SingleChildScrollView(
+                                      child: SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.9,
+                                        child: Form(
+                                          key: _formKey,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const SizedBox(
+                                                height: 20,
+                                              ),
+                                              CustomTextField(
+                                                keyBoard: TextInputType.text,
+                                                labelText: 'Focus Area',
+                                                hintText:
+                                                    "Chest day, leg day etc",
+                                                controller: focusAreaController,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
+                                        },
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          // Add your save logic here
+                                          DatabaseHelper databaseHelper =
+                                              DatabaseHelper.instance;
+                                          databaseHelper.insertWorkoutDays(
+                                              dayName: day,
+                                              focusArea:
+                                                  focusAreaController.text);
+                                          focusAreaController.clear();
+                                          // setState(() {});
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
+                                          setState(() {});
+                                        },
+                                        child: const Text('Save'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: const Text('Add new focus area'),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -149,37 +267,45 @@ class workoutDayPageState extends State<workoutDayPage> {
                                     '${workouts[index]['sets'].toString()} Sets ${workouts[index]['reps'].toString()} Reps'),
                                 trailing: GestureDetector(
                                   onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: const Text("Confirm Deletion"),
-                                              content: const Text("Are you sure you want to delete this workout?"),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop(); // Close the dialog
-                                                  },
-                                                  child: const Text("Cancel"),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    // Add code to delete the workout here
-                                                    DatabaseHelper databasehelper = DatabaseHelper.instance;
-                                                    databasehelper.deleteWorkout(workouts[index]['id']);
-                                                    print(workouts[index]['name']);
-                                                    if (kDebugMode) {
-                                                      print('Deleting... OK');
-                                                    }
-                                                    setState(() {});
-                                                    Navigator.of(context).pop(); // Close the dialog
-                                                  },
-                                                  child: const Text("Delete"),
-                                                ),
-                                              ],
-                                            );
-                                          },
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text("Confirm Deletion"),
+                                          content: const Text(
+                                              "Are you sure you want to delete this workout?"),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context)
+                                                    .pop(); // Close the dialog
+                                              },
+                                              child: const Text("Cancel"),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                // Add code to delete the workout here
+                                                DatabaseHelper databaseHelper =
+                                                    DatabaseHelper.instance;
+                                                databaseHelper.deleteWorkout(
+                                                    workouts[index]['id']);
+                                                if (kDebugMode) {
+                                                  print(
+                                                      workouts[index]['name']);
+                                                }
+                                                if (kDebugMode) {
+                                                  print('Deleting... OK');
+                                                }
+                                                setState(() {});
+                                                Navigator.of(context)
+                                                    .pop(); // Close the dialog
+                                              },
+                                              child: const Text("Delete"),
+                                            ),
+                                          ],
                                         );
+                                      },
+                                    );
                                     // You can access the workout data using workouts[index]
                                   },
                                   child: const Icon(
@@ -200,27 +326,43 @@ class workoutDayPageState extends State<workoutDayPage> {
               },
             ),
           ),
+          // ...
           Row(
             children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    DatabaseHelper databaseHelper = DatabaseHelper.instance;
-                    databaseHelper.updateFocusAreaForDay(day, controller.text);
-                    String editedfocusArea = controller.text;
-                    setState(() {});
-                    print(' HERE $editedfocusArea');
+              FutureBuilder(
+                future: getFocusAreaForDay(day),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(); // Return an empty container while waiting for data
+                  } else if (snapshot.hasError) {
+                    return Container(); // Return an empty container in case of an error
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    // Show the SAVE button if there are workouts
+                    return Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          DatabaseHelper databaseHelper =
+                              DatabaseHelper.instance;
+                          databaseHelper.updateFocusAreaForDay(
+                              day, controller.text);
+                          String editedfocusArea = controller.text;
+                          setState(() {});
+                          print(' HERE $editedfocusArea');
 
-                    // Show a snackbar to indicate that the focus area has been updated
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Focus area updated for $day'),
-                        duration: const Duration(seconds: 2),
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Focus area updated for $day'),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        child: const Text('SAVE'),
                       ),
                     );
-                  },
-                  child: const Text('SAVE'),
-                ),
+                  } else {
+                    return Container(); // Return an empty container if there are no workouts
+                  }
+                },
               ),
             ],
           ),
