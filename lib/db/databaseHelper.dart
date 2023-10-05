@@ -89,7 +89,6 @@ class DatabaseHelper {
     required int weight,
     required int duration,
     required int dayId,
-
   }) async {
     final db = await instance.database;
     await db.insert('workouts', {
@@ -99,8 +98,33 @@ class DatabaseHelper {
       'weight': weight,
       'duration': duration,
       'day_id': dayId,
-
     });
+  }
+
+  // Insert workouts to the workouts table
+  Future<void> editWorkout({
+    required String previousName,
+    required String workoutName,
+    required int sets,
+    required int reps,
+    required int weight,
+    required int duration,
+    required int dayId,
+  }) async {
+    final db = await instance.database;
+    await db.update(
+      'workouts',
+      {
+        'name': workoutName,
+        'sets': sets,
+        'reps': reps,
+        'weight': weight,
+        'duration': duration,
+        'day_id': dayId,
+      },
+      where: 'name = ?',
+      whereArgs: [previousName],
+    );
   }
 
   // Insert user to the users table
@@ -214,7 +238,8 @@ class DatabaseHelper {
   // Fetch users workout days from db
   Future<List<String>> getWorkoutDayNames() async {
     final db = await instance.database;
-    final List<Map<String, dynamic>> results = await db.query('workout_days', columns: ['day_name']);
+    final List<Map<String, dynamic>> results =
+        await db.query('workout_days', columns: ['day_name']);
 
     List<String> dayNames = [];
 
@@ -287,8 +312,8 @@ class DatabaseHelper {
     return await db.query('workouts', where: 'day_id = ?', whereArgs: [dayId]);
   }
 
-
-  Future<void> saveSelectedDaysWithFocusArea(Map<String, String> selectedDaysWithFocusArea) async {
+  Future<void> saveSelectedDaysWithFocusArea(
+      Map<String, String> selectedDaysWithFocusArea) async {
     final db = await database;
     for (var entry in selectedDaysWithFocusArea.entries) {
       await db.insert(
@@ -305,10 +330,11 @@ class DatabaseHelper {
 
   Future<void> deleteWorkout(id) async {
     final db = await database;
-    await db.delete('workouts', where: 'id = ?' , whereArgs: [id]);
+    await db.delete('workouts', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<void> updateFocusAreaForDay(String dayName, String newFocusArea) async {
+  Future<void> updateFocusAreaForDay(
+      String dayName, String newFocusArea) async {
     final db = await instance.database;
     await db.update(
       'workout_days',
@@ -318,15 +344,14 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> deleteWorkoutDay(String day) async{
+  Future<void> deleteWorkoutDay(String day) async {
     final db = await instance.database;
     await db.delete('workout_days', where: 'day_name = ?', whereArgs: [day]);
   }
 
-  Future<List<Map<String, dynamic>>>getAllWorkouts() async{
+  Future<List<Map<String, dynamic>>> getAllWorkouts() async {
     final db = await instance.database;
     var workouts = await db.query('workouts');
     return workouts;
   }
-
 }

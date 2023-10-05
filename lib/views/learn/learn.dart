@@ -65,6 +65,7 @@ class _LearnScreenState extends State<LearnScreen> {
     return day;
   }
 
+
   @override
   void initState() {
     super.initState();
@@ -98,15 +99,14 @@ class _LearnScreenState extends State<LearnScreen> {
                     // Capture the context
                     BuildContext context = this.context;
 
-                    String exerciseName = exerciseNameController.text;
-                    String day = await returnDay(allWorkouts?[index]['day_id']);
-
+                    // String exerciseName = exerciseNameController.text;
+                    String day =  await returnDay(allWorkouts?[index]['day_id']);
                     String name = allWorkouts?[index]['name'];
+
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        String selectedItem =
-                            options.isNotEmpty ? options[0] : '';
+                        String selectedItem = options.isNotEmpty ? options[0] : '';
 
                         if (kDebugMode) {
                           print('OPTIONS $options');
@@ -114,6 +114,7 @@ class _LearnScreenState extends State<LearnScreen> {
                         }
 
                         String exerciseName = allWorkouts?[index]['name'] ?? '';
+                        String previousName = allWorkouts?[index]['name'] ?? '';
                         int sets = allWorkouts?[index]['sets'] ?? 0;
                         int reps = allWorkouts?[index]['reps'] ?? 0;
                         int weight = allWorkouts?[index]['weight'] ?? 0;
@@ -127,14 +128,7 @@ class _LearnScreenState extends State<LearnScreen> {
                         restingTimeController.text = duration.toString();
                         workoutDayController.text = dayId.toString();
 
-
-
-                        // ValueNotifier<String> selectedValue = ValueNotifier<String>('day'); // Step 1
-                        // String selectedValue = day;
                         String selectedValue = options.contains(day) ? day : options.isNotEmpty ? options[0] : '';
-
-
-                        String selectedWorkout = options.isNotEmpty ? options[0] : '';
 
                         return AlertDialog(
                           title: Text('Edit $name Workout'),
@@ -244,6 +238,35 @@ class _LearnScreenState extends State<LearnScreen> {
                             ),
                             ElevatedButton(
                               onPressed: () async {
+                                final DatabaseHelper databaseHelper = DatabaseHelper.instance;
+                                final workoutDayId = await databaseHelper.getWorkoutDayId(selectedItem);
+                                final workoutName = exerciseNameController.text;
+                                final sets = int.parse(setsController.text);
+                                final reps = int.parse(repsController.text);
+                                final weight = int.parse(weightController.text);
+                                final duration = int.parse(restingTimeController.text);
+
+                                print('NAME');
+                                print(previousName);
+
+                                await databaseHelper.editWorkout(
+                                  previousName: previousName,
+                                  workoutName: workoutName,
+                                  sets: sets,
+                                  reps: reps,
+                                  weight: weight,
+                                  duration: duration,
+                                  dayId: workoutDayId,
+                                );
+
+                                exerciseNameController.clear();
+                                setsController.clear();
+                                repsController.clear();
+                                weightController.clear();
+                                restingTimeController.clear();
+                                setState(() {
+
+                                });
                                 Get.back();
                               },
                               child: const Text('Save'),

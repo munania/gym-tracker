@@ -97,27 +97,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-//     return GetMaterialApp(
-//       theme: ThemeData.dark(),
-//       debugShowCheckedModeBanner: false,
-//       initialRoute: '/splash',
-//       getPages: [
-//         GetPage(name: '/splash', page: () => const SplashScreen()),
-//         GetPage(name: '/nameInput', page: () => const NameInputScreen()),
-//         GetPage(name: '/workoutDays', page: () => const WorkoutDaysScreen()),
-//         GetPage(name: '/dashboard', page: () => const DashboardScreen()),
-//         GetPage(name: '/homepage', page: () => const HomePage()),
-//         GetPage(name: '/workouts', page: () => const WorkoutScreen()),
-//         GetPage(name: '/learn', page: () => const LearnScreen()),
-//         GetPage(name: '/workoutFocus', page: () => const WorkoutFocus()),
-//         GetPage(name: '/workoutdata', page: () => const WorkoutData()),
-//         GetPage(
-//             name: '/floatingActionButton',
-//             page: () => const FloatingActionButton(
-//                   onPressed: null,
-//                 )),
-//       ],
-//     );
-//   }
-// }

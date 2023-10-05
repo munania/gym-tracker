@@ -23,6 +23,9 @@ class workoutDayPageState extends State<workoutDayPage> {
   @override
   void initState() {
     super.initState();
+    setState(() {
+
+    });
     controller = TextEditingController(); // Initialize the controller
     getWorkoutForSpecificDay(); // Load workouts on initialization
   }
