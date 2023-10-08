@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:gymtracker/db/databaseHelper.dart';
+import 'package:gymtracker/views/workouts/workout_data.dart';
+import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,6 +54,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+
+
   @override
   void initState() {
     super.initState();
@@ -65,7 +69,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void getCurrentDayWorkoutSession(int dayId) async {
     final DatabaseHelper databaseHelper = DatabaseHelper.instance;
     String? focusArea = await databaseHelper.getFocusAreaForDay(dayId);
-    print('Focus Area: $focusArea');
+    if (kDebugMode) {
+      print('Focus Area: $focusArea');
+    }
   }
 
   @override
@@ -130,17 +136,21 @@ class TodaysWorkout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Future<String?> getCurrentDayWorkoutSession(int dayId) async {
+
+    Future<String?> getCurrentDayWorkoutSession(String day) async {
       final DatabaseHelper databaseHelper = DatabaseHelper.instance;
-      String? focusArea = await databaseHelper.getFocusAreaForDay(dayId);
-      print('Focus Area: $focusArea');
+      String? focusArea = await databaseHelper.getFocusAreaForDayString(day);
+      if (kDebugMode) {
+        print('Focus Area: $focusArea');
+      }
       return focusArea;
     }
 
     Future<String?> day() async {
       DateTime now = DateTime.now();
+      String currentDayString = DateFormat('EEEE').format(now);
       int currentDay = now.weekday;
-      String? x = await getCurrentDayWorkoutSession(currentDay);
+      String? x = await getCurrentDayWorkoutSession(currentDayString);
       return x;
     }
 
@@ -216,7 +226,8 @@ class TodaysWorkout extends StatelessWidget {
                     String d = quotesProvider.getCurrentDay();
                     print("Today is: $d");
 
-                    Get.toNamed('/workoutData');
+                    Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => WorkoutData(currentDay: d)));
                   },
                   child: const Text(
                     'Start Workout',
@@ -245,6 +256,10 @@ class Motivation extends StatelessWidget {
       padding: const EdgeInsets.only(left: 20, right: 20, top: 30),
       child: Consumer<AppProvider>(
         builder: (context, appProvider, _) {
+
+          print('...................................................................');
+          print(appProvider.quote);
+
           return Column(
             children: [
               // A motivation text to be displayed in a standout color in italic and in quotes

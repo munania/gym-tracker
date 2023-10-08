@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../db/databaseHelper.dart';
 import '../../widgets/custom_textfield.dart';
@@ -23,9 +24,6 @@ class workoutDayPageState extends State<workoutDayPage> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-
-    });
     controller = TextEditingController(); // Initialize the controller
     getWorkoutForSpecificDay(); // Load workouts on initialization
   }
@@ -223,9 +221,11 @@ class workoutDayPageState extends State<workoutDayPage> {
                                               focusArea:
                                                   focusAreaController.text);
                                           focusAreaController.clear();
-                                          // setState(() {});
-                                          Navigator.of(context)
-                                              .pop(); // Close the dialog
+
+                                          // Close the dialog
+                                          Navigator.of(context).pop();
+
+                                          // Trigger a rebuild of the widget tree
                                           setState(() {});
                                         },
                                         child: const Text('Save'),

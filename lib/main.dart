@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
           GetPage(name: '/learnScreen', page: () => const LearnScreen()),
           GetPage(name: '/settingsScreen', page: () => const SettingsScreen()),
           GetPage(name: '/workoutFocus', page: () => const WorkoutFocus()),
-          GetPage(name: '/workoutData', page: () => const WorkoutData()),
+          // GetPage(name: '/workoutData', page: () => const WorkoutData()),
           GetPage(name: '/editWorkouts', page: () => const EditWorkouts()),
           GetPage(
               name: '/floatingActionButton',
